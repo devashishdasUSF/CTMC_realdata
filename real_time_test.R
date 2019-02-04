@@ -48,8 +48,8 @@ load(paste0(dat_f, "transition_types.RData"))
 #
 # transition_types = c("arr-BedDate", "BedDate-FirstProv", "BedDate-EKG")
 # dat = splitdata
-train = (info$PresentingComplaint == "Chest Pain")  & (info$LOS <= 1500.00) 
-test = (info$PresentingComplaint == "Fever") & (info$LOS <= 1500.00)
+train = (info$PresentingComplaint == "Abdominal Pain")  & (info$LOS <= 1500.00) & (info$Camebackin14days == FALSE)
+test = (info$PresentingComplaint == "Abdominal Pain") & (info$LOS <= 1500.00) & (info$Camebackin14days == TRUE)
 
 which(train) %>% length
 which(test )%>% length
@@ -79,71 +79,5 @@ for(I in seq(M)) {
 	# save(beta_ij, file = filename)
 }
 names(coefficients) = transition_types
-
-
-
-
-
-
-stat0 = numeric()
-for(i in seq(length(dat))) {
-	temp = rep(0,M)
-	for(I in seq(M)) {
-		temp[I] = generalized_test(dat[[i]], coefficients[[I]],PreviousState[I], transition_types[I], 0.0001, Nbasis)
-	}
-	stat0[i] = max(temp)
-}
-reject = stat0>=quantile(stat0,.95)
-stat0_new = stat0[!reject]
-
-
-
-stat1 = numeric()
-for(i in seq(length(testdat))) {
-	temp = rep(0,M)
-	for(I in seq(M)) {
-		temp[I] = generalized_test(testdat[[i]], coefficients[[I]],PreviousState[I], transition_types[I], 0.001, Nbasis)
-	}
-	stat1[i] = max(temp)
-}
-
-
-print("---- Beta error FR ----")
-print(sum(stat1 <= quantile(stat0_new,.9))/(length(stat1)))
-
-
-
-stat0_los = numeric()
-for(i in seq(length(dat))) {
-	x = dat[[i]] %>% filter(Event == "Departure")
-	stat0_los[i] = x$Time
-}
-
-stat1_los = numeric()
-for(i in seq(length(testdat))) {
-	x = testdat[[i]] %>% filter(Event == "Departure")
-	stat1_los[i] = x$Time
-}
-
-print("---- Beta error simple case----")
-print(sum(stat1_los <= quantile(stat0_los[stat0_los<quantile(stat0_los,.9)],.9))/(length(stat1_los)))
-
-
-
-
-
-
-#  1 Abdominal Pain                  4900
-#  2 Chest Pain                      3723
-#  3 Shortness of Breath             1789
-#  4 Fall                            1766
-#  5 Fever                           1536
-#  6 Dyspnea                         1143
-#  7 Headache                         915
-#  8 Dizziness                        909
-#  9 (BH) Suicidal Ideation/Attempt   876
-# 10 Cough (masked)                   824
-
-
 
 

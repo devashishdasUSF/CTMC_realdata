@@ -6,7 +6,7 @@
 #include <algorithm>
 
 
-const double MAX = 480.00;
+const double MAX = 1500.00;
 
 using namespace Rcpp;
 using namespace arma;
@@ -152,9 +152,28 @@ double generalized_test(DataFrame df, vec beta0,
 }
 
 // [[Rcpp::export]]
-int test(vec a){
-  return a.size();
+vec generalized_test_time(DataFrame df, vec beta0, 
+  String s0, String transitions, 
+  double penalty, int P) {
+  vec n_ij = n_function(df, transitions, P);
+  vec g_ij = y_function(df, s0, P);
+  vec gm = penalty - abs(n_ij - beta0 % g_ij);
+  vec temp1 = gm % gm;
+  vec result(temp1.n_elem, fill::zeros);
+  for (int i = 0; i < result.n_elem; ++i)
+  {
+    if(g_ij[i]>0.0) {
+      result[i] = temp1[i]/g_ij[i];
+    }
+    else {
+      result[i] = 0;
+    }
+  }
+  return result;
 }
+
+
+
 
 /***R
 
