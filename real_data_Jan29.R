@@ -48,8 +48,8 @@ load(paste0(dat_f, "transition_types.RData"))
 #
 # transition_types = c("arr-BedDate", "BedDate-FirstProv", "BedDate-EKG")
 # dat = splitdata
-train = (info$PresentingComplaint == "Chest Pain")  & (info$LOS <= 1500.00) 
-test = (info$PresentingComplaint == "Fever") & (info$LOS <= 1500.00)
+train = (info$PresentingComplaint == "Chest Pain" & (info$ESILevel == "ESILevel 1" | info$ESILevel == "ESILevel 2") & month <= 6)  & (info$LOS <= 1500.00) 
+test = (info$PresentingComplaint == "Chest Pain") & (info$LOS <= 1500.00)
 
 which(train) %>% length
 which(test )%>% length

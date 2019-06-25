@@ -71,7 +71,7 @@ vec integrate_Y(NumericVector &enter_times,
 
 // [[Rcpp::export]]
 vec n_function(DataFrame df, 
-  String transitions, int P = 100) {
+  String transitions, int P = 100, const double MAX = 1500.00) {
 
   StringVector tran = df["tran"];
   NumericVector Time = df["Time"];
@@ -93,7 +93,7 @@ vec n_function(DataFrame df,
 
 // [[Rcpp::export]]
 vec y_function(DataFrame df, 
-  String s0, int P = 100) {
+  String s0, int P = 100, const double MAX = 1500.00) {
 
   StringVector previous_state = df["previous_state"];
   StringVector Event = df["Event"];
@@ -111,7 +111,7 @@ vec y_function(DataFrame df,
   {
     if (previous_state[j] == s0) {
       exit_times.push_back(Time[j]/MAX);
-      if(s0 != "arr") {
+      if(s0 == "arr") {
         enter_times.push_back(0.0);
       } else {    
         enter_times.push_back(Time[j-1]/MAX);
@@ -127,14 +127,14 @@ The following function takes a list of data frame as argument and calculates the
 N_ij function for each 
 */
 // [[Rcpp::export]]
-List get_n_y(List dat, String s0, String transitions, int P = 100) {
+List get_n_y(List dat, String s0, String transitions, int P = 100, const double MAX = 1500.00) {
   vec n_ij(P,fill::zeros);
   vec g_ij(P,fill::zeros);
   for (int i = 0; i < dat.size(); ++i)
   {
     DataFrame df = dat[i];
-    n_ij = n_ij + n_function(df, transitions, P);
-    g_ij = g_ij + y_function(df, s0, P);
+    n_ij = n_ij + n_function(df, transitions, P, MAX);
+    g_ij = g_ij + y_function(df, s0, P, MAX);
   }
   List result = List::create(_["n_ij"] = n_ij , _["g_ij"] = g_ij);
   return result;
@@ -143,9 +143,9 @@ List get_n_y(List dat, String s0, String transitions, int P = 100) {
 // [[Rcpp::export]]
 double generalized_test(DataFrame df, vec beta0, 
   String s0, String transitions, 
-  double penalty, int P) {
-  vec n_ij = n_function(df, transitions, P);
-  vec g_ij = y_function(df, s0, P);
+  double penalty, int P, const double MAX = 1500.00) {
+  vec n_ij = n_function(df, transitions, P, MAX);
+  vec g_ij = y_function(df, s0, P, MAX);
   vec gm = penalty - abs(n_ij - beta0 % g_ij);
   vec temp1 = gm % gm;
   return sum(temp1.elem(arma::find(g_ij>0.0))/g_ij.elem(arma::find(g_ij>0.0)));
@@ -154,9 +154,9 @@ double generalized_test(DataFrame df, vec beta0,
 // [[Rcpp::export]]
 vec generalized_test_time(DataFrame df, vec beta0, 
   String s0, String transitions, 
-  double penalty, int P) {
-  vec n_ij = n_function(df, transitions, P);
-  vec g_ij = y_function(df, s0, P);
+  double penalty, int P, const double MAX = 1500.00) {
+  vec n_ij = n_function(df, transitions, P, MAX);
+  vec g_ij = y_function(df, s0, P, MAX);
   vec gm = penalty - abs(n_ij - beta0 % g_ij);
   vec temp1 = gm % gm;
   vec result(temp1.n_elem, fill::zeros);
