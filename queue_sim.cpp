@@ -407,7 +407,7 @@ arma::mat test_statistic(arma::vec Beta0, int n_servers = 2, double shift = 0.0,
   G.diag() = Y;
 
 
-  return -(2*Beta0.t()*N - Beta0.t()*G*Beta0) + (2*Beta1.t()*N - Beta0.t()*G*Beta1);
+  return -(-2*Beta0.t()*N + Beta0.t()*G*Beta0 + 2*Beta1.t()*N - Beta1.t()*G*Beta1);
 
 }
 
@@ -426,7 +426,6 @@ arma::mat test_stat(arma::vec Beta0, int n_servers = 2, double shift = 0.0, doub
 
 
 /*** R
-library(queuecomputer)
 library(microbenchmark)
 library(dplyr)
 
